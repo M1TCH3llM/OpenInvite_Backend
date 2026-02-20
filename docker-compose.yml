@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/openinvite
+      - SPRING_DATASOURCE_USERNAME=dbadmin
+      - SPRING_DATASOURCE_PASSWORD=your_password
+    restart: unless-stopped
