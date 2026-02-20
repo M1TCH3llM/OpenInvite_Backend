@@ -2,6 +2,7 @@ package com.openinvite.backend.service;
 
 import com.openinvite.backend.dto.UserDTO;
 import com.openinvite.backend.model.User;
+import com.openinvite.backend.repository.FollowRepository;
 import com.openinvite.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,7 +19,38 @@ import java.util.stream.Collectors;
 public class UserService {
     
     private final UserRepository userRepository;
+    private final FollowRepository followRepository;
     private final ModelMapper modelMapper;
+    
+    
+    public List<UserDTO> getAllUsers(String currentUsername) {
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        return userRepository.findAll().stream()
+                .filter(user -> !user.getId().equals(currentUser.getId())) // Exclude current user
+                .map(user -> convertToDTO(user, currentUser))
+                .collect(Collectors.toList());
+    }
+
+    private UserDTO convertToDTO(User user, User currentUser) {
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setDisplayName(user.getDisplayName());
+        dto.setBio(user.getBio());
+        dto.setProfilePictureUrl(user.getProfilePictureUrl());
+        
+        // Check if current user is following this user
+        boolean isFollowing = followRepository.existsByFollowerAndFollowing(currentUser, user);
+        dto.setIsFollowing(isFollowing);
+        
+        // Get counts
+        dto.setFollowersCount(followRepository.countByFollowing(user));
+        dto.setFollowingCount(followRepository.countByFollower(user));
+        
+        return dto;
+    }
     
     public UserDTO getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

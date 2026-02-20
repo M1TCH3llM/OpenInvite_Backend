@@ -4,6 +4,8 @@ import com.openinvite.backend.dto.UserDTO;
 import com.openinvite.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +18,13 @@ import java.util.UUID;
 public class UserController {
     
     private final UserService userService;
+    
+    @GetMapping
+    public ResponseEntity<List<UserDTO>> getAllUsers(@AuthenticationPrincipal UserDetails userDetails) {
+        String currentUsername = userDetails.getUsername();
+        List<UserDTO> users = userService.getAllUsers(currentUsername);
+        return ResponseEntity.ok(users);
+    }
     
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getCurrentUser() {

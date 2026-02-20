@@ -14,5 +14,6 @@ public class UserDTO {
     private String bio;
     private Integer followersCount;
     private Integer followingCount;
+    private Boolean isFollowing; 
     private LocalDateTime createdAt;
 }
